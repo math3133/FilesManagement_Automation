@@ -9,7 +9,7 @@ WrongAssetsName : list = []
 if len(Assets_List) >= 1:
     for x in range(len(Assets_List)):
 
-        NameTest = CheckName.Renamer(Assets_List[x])
+        NameTest = CheckName.AssetRenamer(Assets_List[x])
         NameTest.CheckName()
 
         if NameTest.NameChecked == True:

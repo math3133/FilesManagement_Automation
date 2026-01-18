@@ -1,27 +1,39 @@
-class Renamer:
+import os
+
+class AssetRenamer:
     def __init__(self, AssetName : str):
-        self.AssetName : str = AssetName
+        self.SplitAssetName : list = list(os.path.splitext(AssetName))
         self.FileExtension : str = ""
         self.NameChecked : bool = False
+        self.AssetName : str = ""
 
     def CheckName(self):
 
-        ## Check if it's a string
-        if not isinstance(self.AssetName, str):
+        ## Check if it's a list
+        if not isinstance(self.SplitAssetName, list):
             return
 
         ## Check if AssetName is empty
-        if len(self.AssetName) < 1:
+        if len(self.SplitAssetName[0]) < 1:
+            return
+        
+        ## Check if it has an extension
+        if len(self.SplitAssetName[1]) < 1:
             return
 
         ## Check if it contains a letter or digit
-        for n in range(len(self.AssetName)):
+        name = self.SplitAssetName[0]
+        for n in range(len(name)):
             
-            if self.AssetName[n] >= "A" and self.AssetName[n] <= "Z":
+            if name[n] >= "A" and name[n] <= "Z":
                 self.NameChecked = True
                 return
             
-            if self.AssetName[n] >= "a" and self.AssetName[n] <= "z":
+            if name[n] >= "a" and name[n] <= "z":
+                self.NameChecked = True
+                return
+            
+            if name[n] >= "0" and name[n] <= "9":
                 self.NameChecked = True
                 return
 
@@ -32,18 +44,13 @@ class Renamer:
             return print("Please check name before cleaning it")
 
         ## Remove space character at start and end
-        self.AssetName = self.AssetName.strip()
+        self.SplitAssetName[0] = self.SplitAssetName[0].strip()
 
         ## Replace space character inside Naming
-        self.AssetName = self.AssetName.replace(" ","_")
+        self.SplitAssetName[0] = self.SplitAssetName[0].replace(" ","_")
 
         ## Check and replace Uppercase with lowercase
-        self.AssetName = self.AssetName.lower()
+        self.SplitAssetName[0] = self.SplitAssetName[0].lower()
 
-        ## Add Prefix if it's not already added
-        self.FileExtension = self.AssetName[self.AssetName.index(".") : len(self.AssetName)]
-
-        if self.FileExtension == ".png" or self.FileExtension == ".jpg" or self.FileExtension == ".jpeg":
-
-            if self.AssetName[0 : 1] != "T_":
-                self.AssetName = "T_" + self.AssetName
+        ## Reconstruct Name
+        self.AssetName = self.SplitAssetName[0] + self.SplitAssetName[1]
