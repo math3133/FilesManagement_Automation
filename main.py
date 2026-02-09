@@ -1,17 +1,17 @@
 import os
 import CheckName
 
-DirPath : str = "F:/Perso/Python/FilesManagement_Automation/TestFiles"
-Assets_List : list = os.listdir(DirPath)
 
+DirPath : str = "F:/Perso/Python/FilesManagement_Automation/TestFiles"
+FilesUnaccessible : list = []
 WrongFileType : list = []
 WrongAssetsName : list = []
 
 
-if len(Assets_List) >= 1:
-    for x in range(len(Assets_List)):
+for root, dirs, files in os.walk(DirPath, topdown=True):
+    for x in range(len(files)):
 
-        NameTest : tuple = os.path.splitext(Assets_List[x])
+        NameTest : tuple = os.path.splitext(files[x])
 
         ## Check Extension for class creation
         if NameTest[1] == ".png" or NameTest[1] == ".jpeg" or NameTest[1] == ".jpg":
@@ -21,7 +21,7 @@ if len(Assets_List) >= 1:
             NameTest = CheckName.StaticMeshRenamer(NameTest)
         
         else:
-            WrongFileType.append(Assets_List[x])
+            WrongFileType.append(os.path.join(root + files[x]))
             continue
 
 
@@ -33,21 +33,29 @@ if len(Assets_List) >= 1:
             NameTest.Cleaning()
             NameTest.PrefixCheck()
 
-            if NameTest.AssetName + NameTest.FileExtension != Assets_List[x]:
-                os.rename(os.path.join(DirPath, Assets_List[x]) , os.path.join(DirPath, NameTest.AssetName + NameTest.FileExtension))
+            if NameTest.AssetName + NameTest.FileExtension != files[x]:
+
+                ## Try renaming the files if it doesn't works print the error prompt, and add to a list
+                try :
+                    os.rename(os.path.join(root, files[x]) , os.path.join(root, NameTest.AssetName + NameTest.FileExtension))
+
+                except Exception as ErrorPrompt:
+                    FilesUnaccessible.append(os.path.join(root + files[x]))
+                    print(ErrorPrompt)
 
         else:
-            WrongAssetsName.append(Assets_List[x])
-    
-    print("Name Correction is finished")
+            WrongAssetsName.append(os.path.join(root + files[x]))
 
-    if len(WrongFileType) > 0:
-        print("Check the file type from this asset list")
-        print(WrongFileType)
+print("Name Correction is finished")
 
-    if len(WrongAssetsName) > 0:
-        print("Here's is the list of wrong asset names that needs to be corrected manually, to follow the naming convention or the tool use :")
-        print(WrongAssetsName)
+if len(WrongFileType) > 0:
+    print("Check the file type from this asset list")
+    print(WrongFileType)
 
-else:
-    print("There are no files in the folder")
+if len(WrongAssetsName) > 0:
+    print("Here's is the list of wrong asset names that needs to be corrected manually, to follow the naming convention or the tool use :")
+    print(WrongAssetsName)
+
+if len(FilesUnaccessible) > 0:
+    print("These files were not accessible by the script, please check if they were open or their access was restricted")
+    print(FilesUnaccessible)
