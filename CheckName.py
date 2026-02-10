@@ -1,8 +1,9 @@
-class AssetRenamer:
+class AssetChecker:
     def __init__(self, SplitAssetName : tuple):
         self.AssetName : str = SplitAssetName[0]
         self.FileExtension : str = SplitAssetName[1]
-        self.NameChecked : bool = False
+        self.NameValid : bool = False
+        self.PrefixValid : bool = False
 
 
     def CheckName(self):
@@ -15,63 +16,29 @@ class AssetRenamer:
         if len(self.AssetName) < 1:
             return
 
-        ## Check if it contains a letter or digit but return if no valid character
+        ## Check if it contains a letter, digit or underscore. no other character accepted
         validcharacter = False
         for n in range(len(self.AssetName)):
             if not self.AssetName[n].isalnum():
-                if self.AssetName[n] not in (" ", "_"):
-                    return
+                    if self.AssetName[n] != "_":
+                        return
             validcharacter = True
 
         if validcharacter == True:
-            self.NameChecked = True
+            self.NameValid = True
 
-
-    def Cleaning(self):
-
-        if self.NameChecked == False:
-            print("Please check name before cleaning it")
-            return
-
-        ## Remove space character at start and end
-        self.AssetName = self.AssetName.strip()
-
-        ## Replace space character inside Naming
-        self.AssetName = self.AssetName.replace(" ","_")
-
-        ## Check and replace Uppercase with lowercase
-        self.AssetName = self.AssetName.lower()
-
-class TextureRenamer(AssetRenamer):
+class TextureChecker(AssetChecker):
 
     def PrefixCheck(self):
 
-        if self.NameChecked == False:
-            print("Please check name before cleaning it")
+        if self.AssetName.startswith("T_"):
+            self.PrefixValid = True
             return
-
-        if self.AssetName[0 : 2] == "T_":
-            return
-
-        if self.AssetName[0 : 2] == "t_":
-            self.AssetName = "T_" + self.AssetName[2 : len(self.AssetName)]
-            return
-
-        self.AssetName = "T_" + self.AssetName
-
-class StaticMeshRenamer(AssetRenamer):
+        
+class StaticMeshChecker(AssetChecker):
 
     def PrefixCheck(self):
 
-        if self.NameChecked == False:
-            print("Please check name before cleaning it")
+        if self.AssetName.startswith("SM_"):
+            self.PrefixValid = True
             return
-
-        if self.AssetName[0 : 3] == "SM_":
-            return
-        
-        if self.AssetName[0 : 3] == "Sm_" or self.AssetName[0 : 3] == "sM_" or self.AssetName[0 : 3] == "sm_":
-            self.AssetName = "SM_" + self.AssetName[3 : len(self.AssetName)]
-            return
-        
-        self.AssetName = "SM_" + self.AssetName

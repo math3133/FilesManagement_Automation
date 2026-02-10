@@ -1,65 +1,68 @@
 import os
 import CheckName
 
-def run_renamer(target_path):
+def Run_NameCheck(target_path):
     DirPath : str = target_path
-    FilesUnaccessible : list = []
     WrongFileType : list = []
     WrongAssetsName : list = []
+    MissingPrefix : list = []
 
+    ExtensionMap= {
+        ".png" : CheckName.TextureChecker,
+        ".jpeg" : CheckName.TextureChecker,
+        ".jpg" : CheckName.TextureChecker,
+        ".tga" : CheckName.TextureChecker,
+
+        ".obj" : CheckName.StaticMeshChecker,
+        ".fbx" : CheckName.StaticMeshChecker,
+    }
 
     for root, dirs, files in os.walk(DirPath, topdown=True):
         for x in range(len(files)):
 
-            NameTest : tuple = os.path.splitext(files[x])
+            NameTested : tuple = os.path.splitext(files[x])
+            FilePath : str = os.path.join(root, files[x])
 
             ## Check Extension for class creation
-            if NameTest[1] == ".png" or NameTest[1] == ".jpeg" or NameTest[1] == ".jpg":
-                NameTest = CheckName.TextureRenamer(NameTest)
-
-            elif NameTest[1] == ".obj" or NameTest[1] == ".fbx":
-                NameTest = CheckName.StaticMeshRenamer(NameTest)
-            
-            else:
-                WrongFileType.append(os.path.join(root, files[x]))
+            if NameTested[1] not in ExtensionMap:
+                WrongFileType.append(FilePath)
                 continue
 
+            NameTested = ExtensionMap[NameTested[1]](NameTested)
 
             ## Start Name Checks
-            NameTest.CheckName()
+            NameTested.CheckName()
 
-            if NameTest.NameChecked == True:
+            if NameTested.NameValid == True:
 
-                NameTest.Cleaning()
-                NameTest.PrefixCheck()
+                NameTested.PrefixCheck()
 
-                if NameTest.AssetName + NameTest.FileExtension != files[x]:
-
-                    ## Try renaming the files if it doesn't works print the error prompt, and add to a list
-                    try :
-                        os.rename(os.path.join(root, files[x]) , os.path.join(root, NameTest.AssetName + NameTest.FileExtension))
-
-                    except Exception as ErrorPrompt:
-                        FilesUnaccessible.append(os.path.join(root, files[x]))
-                        print(ErrorPrompt)
+                if NameTested.PrefixValid != True:
+                    MissingPrefix.append(FilePath)
 
             else:
-                WrongAssetsName.append(os.path.join(root, files[x]))
+                WrongAssetsName.append(FilePath)
 
     print("Name Correction is finished")
 
     if len(WrongFileType) > 0:
-        print("Check the file type from this asset list")
-        print(WrongFileType)
+        print("Check the file type from this asset list :")
+        for i in range(len(WrongFileType)):
+            print(WrongFileType[i])
 
     if len(WrongAssetsName) > 0:
-        print("Here's is the list of wrong asset names that needs to be corrected manually, to follow the naming convention or the tool use :")
-        print(WrongAssetsName)
+        print("Here's is the list of wrong asset names that needs to be corrected, to follow the naming convention or the tool use :")
+        for i in range(len(WrongAssetsName)):
+            print(WrongAssetsName[i])
 
-    if len(FilesUnaccessible) > 0:
+    if len(MissingPrefix) > 0:
         print("These files were not accessible by the script, please check if they were open or their access was restricted")
-        print(FilesUnaccessible)
+        for i in range(len(MissingPrefix)):
+            print(MissingPrefix[i])
+
+
+
 
 if __name__ == "__main__":
     path_to_clean : str = "F:\\Perso\\Python\\FilesManagement_Automation\\TestFiles"
-    run_renamer(path_to_clean)
+    Run_NameCheck(path_to_clean)
