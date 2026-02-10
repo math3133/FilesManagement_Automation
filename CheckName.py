@@ -14,21 +14,17 @@ class AssetRenamer:
         ## Check if AssetName is empty
         if len(self.AssetName) < 1:
             return
-        
-        ## Check if it contains a letter or digit
+
+        ## Check if it contains a letter or digit but return if no valid character
+        validcharacter = False
         for n in range(len(self.AssetName)):
-            
-            if self.AssetName[n] >= "A" and self.AssetName[n] <= "Z":
-                self.NameChecked = True
-                return
-            
-            if self.AssetName[n] >= "a" and self.AssetName[n] <= "z":
-                self.NameChecked = True
-                return
-            
-            if self.AssetName[n] >= "0" and self.AssetName[n] <= "9":
-                self.NameChecked = True
-                return
+            if not self.AssetName[n].isalnum():
+                if self.AssetName[n] not in (" ", "_"):
+                    return
+            validcharacter = True
+
+        if validcharacter == True:
+            self.NameChecked = True
 
 
     def Cleaning(self):
